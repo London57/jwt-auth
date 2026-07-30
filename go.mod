@@ -1,4 +1,4 @@
-module github.com/London57/auth-jwt
+module github.com/London57/jwt-auth
 
 go 1.25.11
 
