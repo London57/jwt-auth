@@ -34,7 +34,7 @@ func (j JwtImpl) CreateAccessToken(id uuid.UUID, username string, secret string,
 	return t, nil
 }
 
-func (j JwtImpl) CreateRefreshToken(id uuid.UUID, name string, secret string, expiry int) (string, error) {
+func (j JwtImpl) CreateRefreshToken(id uuid.UUID, secret string, expiry int) (string, error) {
 	exp := time.Now().Add(time.Hour * time.Duration(expiry))
 	claimsRefresh := &JwtCustomRefreshClaims{
 		ID: id,
@@ -51,8 +51,8 @@ func (j JwtImpl) CreateRefreshToken(id uuid.UUID, name string, secret string, ex
 	return t, nil
 }
 
-func IsAuthorized(requestToken string, secret string) (bool, error) {
-	_, err := jwt.Parse(requestToken, func(token *jwt.Token) (any, error) {
+func IsAuthorized(token string, secret string) (bool, error) {
+	_, err := jwt.Parse(token, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected sighing method: %v", token.Header["alg"])
 		}
