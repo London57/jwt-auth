@@ -9,16 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type Jwt interface {
-	CreateAccessToken(id uuid.UUID, username string, secret string, expiry int) (string, error)
-	CreateRefreshToken(id uuid.UUID, secret string, expiry int) (string, error)
+	CreateAccessToken(id uuid.UUID, username string) (string, error)
+	CreateRefreshToken(id uuid.UUID, secret string) (string, error)
 	RefreshAccessToken(refresh string) (string, string, error)
 }
 
 type JwtImpl struct {
-	secret string
-	accessExp int
+	secret     string
+	accessExp  int
 	refreshExp int
 }
 
@@ -38,7 +37,7 @@ func (j JwtImpl) CreateAccessToken(id uuid.UUID, username string) (string, error
 	}
 	return t, nil
 }
-	
+
 func (j JwtImpl) CreateRefreshToken(id uuid.UUID) (string, error) {
 	exp := time.Now().Add(time.Hour * time.Duration(j.refreshExp))
 	claimsRefresh := &JwtCustomRefreshClaims{
@@ -108,7 +107,7 @@ func ExtractFieldFromToken(requestToken string, secret string, field string) (st
 	if !ok || !token.Valid {
 		return "", fmt.Errorf("token is invalid")
 	}
-	if claims[field] == nil { 
+	if claims[field] == nil {
 		return "", errors.New("field not found")
 	}
 	return claims[field].(string), nil
@@ -129,7 +128,7 @@ func (j JwtImpl) ExtractFieldFromToken(requestToken string, field string) (strin
 	if !ok || !token.Valid {
 		return "", fmt.Errorf("token is invalid")
 	}
-	if claims[field] == nil { 
+	if claims[field] == nil {
 		return "", errors.New("field not found")
 	}
 	return claims[field].(string), nil
@@ -141,7 +140,7 @@ func (j JwtImpl) RefreshAccessToken(access, refresh string) (string, string, err
 		return "", "", err
 	}
 	if !authorised {
-		return "", "", errors.New("you are not authorised") 
+		return "", "", errors.New("you are not authorised")
 	}
 
 	id, err := j.ExtractFieldFromToken(refresh, "id")
